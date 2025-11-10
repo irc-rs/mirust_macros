@@ -1,6 +1,6 @@
 # mirust_macros
 
-Procedural macros for the [`mirust`](https://github.com/irc-rs/mirust) SDK, designed to simplify the creation of mIRC/AdiIRC-compatible DLLs in Rust.
+An attribute macro for the [`mirust`](https://github.com/irc-rs/mirust) SDK, designed to simplify the creation of mIRC/AdiIRC-compatible DLLs in Rust.
 
 This crate provides an attribute macro for exporting functions with the correct signature and FFI setup expected by IRC clients.
 
