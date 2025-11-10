@@ -21,15 +21,15 @@ pub fn mirust_fn(_attr: TokenStream, item: TokenStream) -> TokenStream {
             show: BOOL,
             nopause: BOOL,
         ) -> i32 {
-            let loadinfo = mirust_sdk::get_loadinfo();
+            let loadinfo = mirust::get_loadinfo();
 
             let (data, parms) = if (loadinfo.m_unicode.into()) {
-                let data_str = mirust_sdk::pwstr_to_string(data_ptr as *const u16, loadinfo.m_bytes as usize);
-                let parms_str = mirust_sdk::pwstr_to_string(parms_ptr as *const u16, loadinfo.m_bytes as usize);
+                let data_str = mirust::pwstr_to_string(data_ptr as *const u16, loadinfo.m_bytes as usize);
+                let parms_str = mirust::pwstr_to_string(parms_ptr as *const u16, loadinfo.m_bytes as usize);
                 (data_str, parms_str)
             } else {
-                let data_str = mirust_sdk::pstr_to_string(data_ptr as *const u8, loadinfo.m_bytes as usize);
-                let parms_str = mirust_sdk::pstr_to_string(parms_ptr as *const u8, loadinfo.m_bytes as usize);
+                let data_str = mirust::pstr_to_string(data_ptr as *const u8, loadinfo.m_bytes as usize);
+                let parms_str = mirust::pstr_to_string(parms_ptr as *const u8, loadinfo.m_bytes as usize);
                 (data_str, parms_str)
             };
 
@@ -39,17 +39,17 @@ pub fn mirust_fn(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
             if loadinfo.m_unicode.into() {
                 if let Some(ref data_str) = result.data {
-                    mirust_sdk::string_to_pwstr(data_str, data_ptr as *const u16, loadinfo.m_bytes as usize);
+                    mirust::string_to_pwstr(data_str, data_ptr as *const u16, loadinfo.m_bytes as usize);
                 }
                 if let Some(ref parms_str) = result.parms {
-                    mirust_sdk::string_to_pwstr(parms_str, parms_ptr as *const u16, loadinfo.m_bytes as usize);
+                    mirust::string_to_pwstr(parms_str, parms_ptr as *const u16, loadinfo.m_bytes as usize);
                 }
             } else {
                 if let Some(ref data_str) = result.data {
-                    mirust_sdk::string_to_pstr(data_str, data_ptr as *const u8, loadinfo.m_bytes as usize);
+                    mirust::string_to_pstr(data_str, data_ptr as *const u8, loadinfo.m_bytes as usize);
                 }
                 if let Some(ref parms_str) = result.parms {
-                    mirust_sdk::string_to_pstr(parms_str, parms_ptr as *const u8, loadinfo.m_bytes as usize);
+                    mirust::string_to_pstr(parms_str, parms_ptr as *const u8, loadinfo.m_bytes as usize);
                 }
             }
 
