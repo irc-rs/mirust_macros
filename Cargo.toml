@@ -1,6 +1,6 @@
 [package]
 name = "mirust_macros"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 license = "MIT"
 description = "Attribute macro for exporting mIRC/AdiIRC-compatible DLL functions in Rust."

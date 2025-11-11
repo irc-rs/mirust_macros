@@ -4,14 +4,49 @@ use quote::quote;
 use syn::{parse_macro_input, ItemFn};
 
 #[proc_macro_attribute]
-pub fn mirust_fn(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn mirust_fn(attr: TokenStream, item: TokenStream) -> TokenStream {
+    // Simple string-based parse of the attribute tokens to extract `dllcall = true/false`.
+    // We avoid pulling in proc_macro2 or complex syn parsing here for simplicity.
+    let attr_string = attr.to_string();
+    let _dllcall = (|| {
+        if let Some(pos) = attr_string.find("dllcall") {
+            if let Some(eq_pos) = attr_string[pos..].find('=') {
+                let rest = &attr_string[pos + eq_pos + 1..];
+                let rest = rest.trim_start();
+                if rest.starts_with("true") {
+                    return true;
+                }
+                if rest.starts_with("false") {
+                    return false;
+                }
+            }
+        }
+
+        false
+    })();
+
     let input = parse_macro_input!(item as ItemFn);
     let output_name = input.sig.ident.clone();
 
     let inputs = input.sig.inputs.clone();
     let block = input.block.clone();
 
-    let output = quote! {
+        // Build a token fragment for the dllcall handling only if the attribute
+        // requested it. Example: #[mirust_fn(dllcall = true)]
+        let dllcall_body = if _dllcall {
+            quote! {
+                // Check if we're on mIRC's main thread 
+                if mirust::is_main_thread(loadinfo.m_hwnd) {
+                    // mIRC called this fn with $dll instead of $dllcall
+                    // We shouldn't block the GUI thread, so return 1 to continue.
+                    return 1; // Continue
+                }
+            }
+        } else {
+            quote! {}
+        };
+
+        let output = quote! {
         #[unsafe(no_mangle)]
         pub unsafe extern "system" fn #output_name(
             m_wnd: HWND,
@@ -22,6 +57,8 @@ pub fn mirust_fn(_attr: TokenStream, item: TokenStream) -> TokenStream {
             nopause: BOOL,
         ) -> i32 {
             let loadinfo = mirust::get_loadinfo();
+
+            #dllcall_body
 
             let (data, parms) = if (loadinfo.m_unicode.into()) {
                 let data_str = mirust::pwstr_to_string(data_ptr as *const u16, loadinfo.m_bytes as usize);
